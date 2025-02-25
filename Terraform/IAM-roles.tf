@@ -52,6 +52,26 @@ resource "aws_iam_policy" "lambda_policy" {
           "dynamodb:Scan"
         ]
         Resource = aws_dynamodb_table.my_table.arn
+      },
+      {
+        # lambda need perms to read from the queue - SQS
+        Effect = "Allow"
+        Action = [
+          "sqs:ReceiveMessage",
+          "sqs:DeleteMessage",
+          "sqs:GetQueueAttributes"
+        ]
+        Resource = aws_sqs_queue.notification_queue.arn
+      },
+      {
+        Effect   = "Allow"
+        Action   = "logs:CreateLogGroup"
+        Resource = "arn:aws:logs:*:*:*"
+      },
+      {
+        Effect   = "Allow"
+        Action   = ["logs:CreateLogStream", "logs:PutLogEvents"]
+        Resource = "arn:aws:logs:*:*:log-group:/aws/lambda/*"
       }
     ]
   })
