@@ -16,6 +16,17 @@ Routing Logic in Lambda:
 
 * Message Status is logged in DynamoDB. If the message fails, it is sent to an SQS Dead-Letter Queue (DLQ) for retry processing.
 
+
+## How API Gateway + Lambda works
+
+1️⃣ Client (Mobile/Web App) sends an HTTP request (e.g., POST /send-notification).
+2️⃣ API Gateway receives the request, applies authentication, validation, and rate limiting.
+3️⃣ API Gateway triggers Lambda, passing the request body as an event.
+4️⃣ Lambda processes the request (email, SMS, or push notification).
+5️⃣ Lambda returns a response to API Gateway.
+6️⃣ API Gateway forwards the response back to the client.
+
+
 ## Benefits of This Approach
 
 ✅ Scalability – AWS services handle millions of notifications efficiently.
