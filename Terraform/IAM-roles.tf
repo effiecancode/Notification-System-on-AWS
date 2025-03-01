@@ -28,7 +28,7 @@ resource "aws_iam_policy" "lambda_policy" {
       {
         Action   = ["sns:Publish"]
         Effect   = "Allow"
-        Resource = aws_sns_topic.notification_topic.arn
+        Resource = aws_sns_topic.sns_notifications.arn
       },
       {
         # Lambda needs permissions to send traces to X-Ray. Modify the IAM policy:
@@ -51,7 +51,7 @@ resource "aws_iam_policy" "lambda_policy" {
           "dynamodb:GetItem",
           "dynamodb:Scan"
         ]
-        Resource = aws_dynamodb_table.my_table.arn
+        Resource = aws_dynamodb_table.NotificationsTable.arn
       },
       {
         # lambda need perms to read from the queue - SQS

@@ -16,8 +16,8 @@ resource "aws_lambda_function" "notification_lambda" {
     variables = {
       SES_SENDER_EMAIL = var.default_email
       SQS_QUEUE_URL    = aws_sqs_queue.notification_queue.url
-      DYNAMODB_TABLE   = aws_dynamodb_table.notifications.name
-      SNS_TOPIC_ARN    = aws_sns_topic.notification_topic.arn
+      DYNAMODB_TABLE   = aws_dynamodb_table.NotificationsTable.name
+      SNS_TOPIC_ARN    = aws_sns_topic.sns_notifications.arn
     }
   }
 }

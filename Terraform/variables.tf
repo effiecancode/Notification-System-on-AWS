@@ -58,12 +58,17 @@ variable "sqs_queue_name" {
 
 variable "dynamodb_table_name" {
   description = "DynamoDB table name"
-  default     = "Notifications-table"
+  default     = "NotificationsTable"
 }
 
 variable "sns_topic_name" {
   description = "SNS topic name"
-    default     = "Notification-topic"
+    default     = "sns_notifications"
+}
+
+variable "ses_topic_name" {
+  description = "SNS topic name"
+    default     = "ses_notifications"
 }
 
 variable "default_email" {
@@ -80,7 +85,7 @@ resource "aws_lambda_function" "metadata_logger" {
 
   environment {
     variables = {
-      DYNAMODB_TABLE = aws_dynamodb_table.my_table.name
+      DYNAMODB_TABLE = aws_dynamodb_table.NotificationsTable.name
     }
   }
 }

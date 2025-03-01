@@ -1,4 +1,4 @@
-# Alarm for lambda
+# Alarm for lambda execution errors
 resource "aws_cloudwatch_metric_alarm" "lambda_error_alarm" {
   alarm_name          = "LambdaErrorAlarm"
   comparison_operator = "GreaterThanThreshold"
@@ -9,7 +9,7 @@ resource "aws_cloudwatch_metric_alarm" "lambda_error_alarm" {
   statistic          = "Sum"
   threshold          = 1
   alarm_description  = "Triggered when Lambda has errors"
-  alarm_actions      = [aws_sns_topic.notification_topic.arn]
+  alarm_actions      = [aws_sns_topic.sns_notifications.arn]
   dimensions = {
     FunctionName = aws_lambda_function.notification_lambda.function_name
   }
@@ -27,7 +27,7 @@ resource "aws_cloudwatch_metric_alarm" "api_latency_alarm" {
   statistic          = "Average"
   threshold          = 2000
   alarm_description  = "Triggered when API Gateway latency exceeds 2 seconds"
-  alarm_actions      = [aws_sns_topic.notification_topic.arn]
+  alarm_actions      = [aws_sns_topic.sns_notifications.arn]
   dimensions = {
     ApiName = aws_apigatewayv2_api.notification_api.name
   }
@@ -43,7 +43,7 @@ resource "aws_cloudwatch_metric_alarm" "ses_failures_alarm" {
   period             = 60
   statistic          = "Sum"
   threshold          = 1
-  alarm_actions      = [aws_sns_topic.notification_topic.arn]
+  alarm_actions      = [aws_sns_topic.ses_notifications.arn]
 }
 
 # Alarm for high read usage
@@ -56,9 +56,9 @@ resource "aws_cloudwatch_metric_alarm" "dynamodb_high_read_usage" {
   period              = 60
   statistic           = "Sum"
   threshold           = 500
-  alarm_actions       = [aws_sns_topic.notification_topic.arn]
+  alarm_actions       = [aws_sns_topic.ses_notifications.arn]
   dimensions = {
-    TableName = aws_dynamodb_table.my_table.name
+    TableName = aws_dynamodb_table.NotificationsTable.name
   }
 }
 
@@ -72,25 +72,10 @@ resource "aws_cloudwatch_metric_alarm" "dynamodb_write_throttle_alarm" {
   period              = 60
   statistic           = "Sum"
   threshold           = 1
-  alarm_actions       = [aws_sns_topic.notification_topic.arn]
+  alarm_actions       = [aws_sns_topic.ses_notifications.arn]
   dimensions = {
-    TableName = aws_dynamodb_table.my_table.name
+    TableName = aws_dynamodb_table.NotificationsTable.name
   }
 }
 
-# Alarm for lambda execution errors
-resource "aws_cloudwatch_metric_alarm" "lambda_error_alarm" {
-  alarm_name          = "LambdaExecutionErrors"
-  comparison_operator = "GreaterThanThreshold"
-  evaluation_periods  = 1
-  metric_name         = "Errors"
-  namespace           = "AWS/Lambda"
-  period              = 60
-  statistic           = "Sum"
-  threshold           = 1
-  alarm_actions       = [aws_sns_topic.notification_topic.arn]
-  dimensions = {
-    FunctionName = aws_lambda_function.metadata_logger.function_name
-  }
-}
 

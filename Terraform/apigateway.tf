@@ -2,6 +2,16 @@ resource "aws_apigatewayv2_api" "notification_api" {
   name          = "NotificationAPI"
   protocol_type = "HTTP"
 }
+resource "aws_api_gateway_rest_api" "notification_api" {
+  name        = "NotificationAPI"
+  description = "API Gateway for notifications"
+}
+
+resource "aws_api_gateway_resource" "notifications" {
+  rest_api_id = aws_api_gateway_rest_api.notification_api.id
+  parent_id   = aws_api_gateway_rest_api.notification_api.root_resource_id
+  path_part   = "notifications"
+}
 
 resource "aws_api_gateway_method" "post_notification" {
   rest_api_id   = aws_api_gateway_rest_api.notification_api.id
@@ -15,6 +25,29 @@ resource "aws_apigatewayv2_stage" "notification_stage" {
   name        = "prod"
   auto_deploy = true
 }
+
+# resource "aws_apigateway_stage" "notification_stage" {
+#   api_id      = aws_apigateway_api.notification_api.id
+#   name        = "prod"
+#   auto_deploy = true
+# }
+resource "aws_api_gateway_stage" "notification_stage" {
+  deployment_id = aws_api_gateway_deployment.notification_deployment.id
+  rest_api_id   = aws_api_gateway_rest_api.notification_api.id
+  stage_name    = "prod"
+}
+
+# api gatway deployment
+resource "aws_api_gateway_deployment" "notification_deployment" {
+  rest_api_id = aws_api_gateway_rest_api.notification_api.id
+  triggers = {
+    redeployment = sha1(jsonencode(aws_api_gateway_rest_api.notification_api))
+  }
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+
 
 resource "aws_apigatewayv2_integration" "lambda_integration" {
   api_id           = aws_apigatewayv2_api.notification_api.id
