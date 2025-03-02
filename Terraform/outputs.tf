@@ -41,7 +41,4 @@ output "api_gateway_url" {
   value = aws_api_gateway_stage.notification_stage.invoke_url
 }
 
-output "api_gatewayv2_url" {
-  value = aws_apigatewayv2_stage.notification_stage.invoke_url
-}
 

@@ -16,7 +16,7 @@ resource "aws_dynamodb_table" "NotificationsTable" {
 
 
 
-  # enable detailed monitoring for dynamodb
+# enable detailed monitoring for dynamodb
 #   stream_enabled   = true
 #   stream_view_type = "NEW_AND_OLD_IMAGES" # Enables Change Streams
 

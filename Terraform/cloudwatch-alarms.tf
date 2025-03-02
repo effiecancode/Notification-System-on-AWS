@@ -4,12 +4,12 @@ resource "aws_cloudwatch_metric_alarm" "lambda_error_alarm" {
   comparison_operator = "GreaterThanThreshold"
   evaluation_periods  = 1
   metric_name         = "Errors"
-  namespace          = "AWS/Lambda"
-  period             = 60
-  statistic          = "Sum"
-  threshold          = 1
-  alarm_description  = "Triggered when Lambda has errors"
-  alarm_actions      = [aws_sns_topic.sns_notifications.arn]
+  namespace           = "AWS/Lambda"
+  period              = 60
+  statistic           = "Sum"
+  threshold           = 1
+  alarm_description   = "Triggered when Lambda has errors"
+  alarm_actions       = [aws_sns_topic.sns_notifications.arn]
   dimensions = {
     FunctionName = aws_lambda_function.notification_lambda.function_name
   }
@@ -22,14 +22,14 @@ resource "aws_cloudwatch_metric_alarm" "api_latency_alarm" {
   comparison_operator = "GreaterThanThreshold"
   evaluation_periods  = 2
   metric_name         = "Latency"
-  namespace          = "AWS/ApiGateway"
-  period             = 60
-  statistic          = "Average"
-  threshold          = 2000
-  alarm_description  = "Triggered when API Gateway latency exceeds 2 seconds"
-  alarm_actions      = [aws_sns_topic.sns_notifications.arn]
+  namespace           = "AWS/ApiGateway"
+  period              = 60
+  statistic           = "Average"
+  threshold           = 2000
+  alarm_description   = "Triggered when API Gateway latency exceeds 2 seconds"
+  alarm_actions       = [aws_sns_topic.sns_notifications.arn]
   dimensions = {
-    ApiName = aws_apigatewayv2_api.notification_api.name
+    ApiName = aws_api_gateway_rest_api.notification_api.name
   }
 }
 
@@ -39,11 +39,11 @@ resource "aws_cloudwatch_metric_alarm" "ses_failures_alarm" {
   comparison_operator = "GreaterThanThreshold"
   evaluation_periods  = 1
   metric_name         = "SendFailure"
-  namespace          = "AWS/SES"
-  period             = 60
-  statistic          = "Sum"
-  threshold          = 1
-  alarm_actions      = [aws_sns_topic.ses_notifications.arn]
+  namespace           = "AWS/SES"
+  period              = 60
+  statistic           = "Sum"
+  threshold           = 1
+  alarm_actions       = [aws_sns_topic.ses_notifications.arn]
 }
 
 # Alarm for high read usage

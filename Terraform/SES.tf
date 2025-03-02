@@ -2,16 +2,10 @@ resource "aws_ses_email_identity" "verified_email" {
   email = var.default_email
 }
 
-# send email from your custom domain
-# resource "aws_ses_domain_identity" "ses_domain" {
-#   domain = "example.com"
-# }
+# delivery notifications
+resource "aws_ses_identity_notification_topic" "ses_delivery_notifications" {
+  topic_arn         = aws_sns_topic.sns_notifications.arn
+  notification_type = "Delivery"
+  identity          = var.default_email
+}
 
-# resource "aws_ses_domain_dkim" "ses_dkim" {
-#   domain = aws_ses_domain_identity.ses_domain.domain
-# }
-
-# resource "aws_ses_domain_mail_from" "ses_mail_from" {
-#   domain           = aws_ses_domain_identity.ses_domain.domain
-#   mail_from_domain = "mail.example.com"
-# }

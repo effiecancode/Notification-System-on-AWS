@@ -1,9 +1,6 @@
-resource "aws_apigatewayv2_api" "notification_api" {
-  name          = "NotificationAPI"
-  protocol_type = "HTTP"
-}
+
 resource "aws_api_gateway_rest_api" "notification_api" {
-  name        = "NotificationAPI"
+  name        = "aws_api_gateway_rest_api"
   description = "API Gateway for notifications"
 }
 
@@ -20,17 +17,16 @@ resource "aws_api_gateway_method" "post_notification" {
   authorization = "NONE" # Use "AWS_IAM" or "COGNITO_USER_POOLS" for security
 }
 
-resource "aws_apigatewayv2_stage" "notification_stage" {
-  api_id      = aws_apigatewayv2_api.notification_api.id
-  name        = "prod"
-  auto_deploy = true
+# Define the integration between API Gateway and Lambda
+resource "aws_api_gateway_integration" "lambda_integration" {
+  rest_api_id             = aws_api_gateway_rest_api.notification_api.id
+  resource_id             = aws_api_gateway_resource.notifications.id
+  http_method             = aws_api_gateway_method.post_notification.http_method
+  integration_http_method = "POST"
+  type                    = "AWS_PROXY"
+  uri                     = aws_lambda_function.notification_lambda.invoke_arn
 }
 
-# resource "aws_apigateway_stage" "notification_stage" {
-#   api_id      = aws_apigateway_api.notification_api.id
-#   name        = "prod"
-#   auto_deploy = true
-# }
 resource "aws_api_gateway_stage" "notification_stage" {
   deployment_id = aws_api_gateway_deployment.notification_deployment.id
   rest_api_id   = aws_api_gateway_rest_api.notification_api.id
@@ -49,22 +45,10 @@ resource "aws_api_gateway_deployment" "notification_deployment" {
 }
 
 
-resource "aws_apigatewayv2_integration" "lambda_integration" {
-  api_id           = aws_apigatewayv2_api.notification_api.id
-  integration_type = "AWS_PROXY"
-  integration_method = "POST"
-  integration_uri  = aws_lambda_function.notification_lambda.invoke_arn
-}
-
-resource "aws_apigatewayv2_route" "notification_route" {
-  api_id    = aws_apigatewayv2_api.notification_api.id
-  route_key = "POST /send-notification"
-  target    = "integrations/${aws_apigatewayv2_integration.lambda_integration.id}"
-}
 
 resource "aws_lambda_permission" "api_gateway" {
   action        = "lambda:InvokeFunction"
   function_name = aws_lambda_function.notification_lambda.function_name
   principal     = "apigateway.amazonaws.com"
-  source_arn    = "${aws_apigatewayv2_api.notification_api.execution_arn}/*/*"
+  source_arn    = "${aws_api_gateway_rest_api.notification_api.execution_arn}/*/*"
 }

@@ -63,25 +63,30 @@ variable "dynamodb_table_name" {
 
 variable "sns_topic_name" {
   description = "SNS topic name"
-    default     = "sns_notifications"
+  default     = "sns_notifications"
 }
 
 variable "ses_topic_name" {
-  description = "SNS topic name"
-    default     = "ses_notifications"
+  description = "SES topic name"
+  default     = "ses_notifications"
 }
 
 variable "default_email" {
   description = "SES default email"
-    default     = "faitheffie25@gmail.com"
+  default     = "faitheffie25@gmail.com"
+}
+
+variable "aws_api_gateway_rest_api" {
+  description = "API gateway name"
+  default     = "aws_api_gateway_rest_api"
 }
 
 resource "aws_lambda_function" "metadata_logger" {
-  function_name    = "MetadataLoggerLambda"
-  role             = aws_iam_role.lambda_exec.arn
-  runtime         = "python3.9"
-  handler         = "index.lambda_handler"
-  filename        = "lambda.zip"
+  function_name = "MetadataLoggerLambda"
+  role          = aws_iam_role.lambda_exec.arn
+  runtime       = "python3.9"
+  handler       = "index.lambda_handler"
+  filename      = "lambda.zip"
 
   environment {
     variables = {

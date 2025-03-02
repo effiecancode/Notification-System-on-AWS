@@ -4,7 +4,7 @@
 
 resource "aws_cloudwatch_log_group" "api_gw_logs" {
   # apigateway uses paths to maintain consistency with AWS's logging hierarchy
-  name              = "/aws/apigateway/${aws_apigatewayv2_api.notification_api.name}"
+  name              = "/aws/apigateway/${aws_api_gateway_rest_api.notification_api.id}"
   retention_in_days = 30
 }
 
