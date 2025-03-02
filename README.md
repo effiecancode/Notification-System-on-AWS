@@ -5,6 +5,7 @@ Cloud native Notification system running on AWS: Sends notifications to end-user
 ## Design Overview:
 
 * Event-Driven Architecture using Amazon EventBridge or AWS SNS for decoupling notification requests from services.
+* * API Gateway to receive a request
 * AWS Lambda to process and deliver notifications to different channels (Email, SMS, Push).
 * Amazon SES for Email, Amazon SNS for SMS and Push Notifications.
 * DynamoDB for message tracking and logging notification status.
