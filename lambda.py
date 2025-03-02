@@ -2,54 +2,20 @@
 
 import boto3
 import os
-import uuid
-from time import datetime
-import json
-
-ses_client = boto3.client("ses", region_name="eu-west-2")
-sns_client = boto3.client("sns", region_name="eu-west-2")
-dynamodb = boto3.resource('dynamodb')
-
-# Notification Table References
-metadata_table = dynamodb.Table('NotificationMetadata')
-delivery_table = dynamodb.Table('DeliveryStatus')
-status_table = dynamodb.Table('NotificationStatus')
-
-# handle sending email using SES
-def send_email(recipient, subject, body):
-    recipient = recipient.get("recipient", "user@example.com")
-    subject = "Notification Alert"
-    body = "This is an automated email from your AWS Lambda function."
-
-    response = ses_client.send_email(
-        Source=os.getenv("SES_SENDER_EMAIL"),
-        Destination={"ToAddresses": [recipient]},
-        Message={
-            "Subject": {"Data": subject},
-            "Body": {"Text": {"Data": body}}
-        }
-    )
-
-    return {
-        "statusCode": 200,
-        "body": f"Email sent! Message ID: {response['MessageId']}"
-        # json.dumps({"message": "Email sent!", "MessageId": response["MessageId"]})
-    }
-
-import boto3
-import os
 import json
 import uuid
 import datetime
 
 # Initialize AWS clients
-ses_client = boto3.client("ses", region_name="us-east-1")
-sns_client = boto3.client("sns", region_name="us-east-1")
+ses_client = boto3.client("ses", region_name="eu-west-2")
+sns_client = boto3.client("sns", region_name="eu-west-2")
 dynamodb = boto3.resource('dynamodb')
 
 # Load environment variables
-SES_SENDER_EMAIL = os.getenv("SES_SENDER_EMAIL")
-DYNAMODB_TABLE = os.getenv("DYNAMODB_TABLE")
+#SES_SENDER_EMAIL = os.getenv("SES_SENDER_EMAIL")
+SES_SENDER_EMAIL = "faitheffie25@gmail.com"
+# DYNAMODB_TABLE = os.getenv("DYNAMODB_TABLE")
+DYNAMODB_TABLE = "NotificationsTable"
 SNS_PLATFORM_APPLICATION_ARN = os.getenv("SNS_PLATFORM_APPLICATION_ARN")  # SNS push notification ARN
 
 # Function to send email using SES
@@ -62,15 +28,21 @@ def send_email(recipient, subject, body):
             "Body": {"Text": {"Data": body}}
         }
     )
-    return response["MessageId"]
+    return {
+        "statusCode": 200,
+        "body": f"Email sent! Message ID: {response['MessageId']}"
+        # json.dumps({"message": "Email sent!", "MessageId": response["MessageId"]})
+    }
 
 # Function to send SMS using SNS
-def send_sms(phone_number, message):
-    response = sns_client.publish(
-        PhoneNumber=phone_number,
-        Message=message
-    )
-    return response["MessageId"]
+# def send_sms(phone_number, message):
+#     response = sns_client.publish(
+#         PhoneNumber=phone_number,
+#         Message=message
+#     )
+#     return response["MessageId"]
+
+
 
 # Function to send push notifications using SNS
 def send_push_notification(device_token, message):
@@ -160,7 +132,8 @@ This architecture ensures:
 
 # Function to store notification metadata in DynamoDB
 
-DYNAMODB_TABLE = os.getenv("DYNAMODB_TABLE")
+# DYNAMODB_TABLE = os.getenv("DYNAMODB_TABLE")
+DYNAMODB_TABLE = "NotificationsTable"
 
 def store_notification_metadata(notification_id, recipient, channel, status):
     table = dynamodb.Table(DYNAMODB_TABLE)
@@ -180,20 +153,20 @@ def store_notification_metadata(notification_id, recipient, channel, status):
 def lambda_handler(event, context):
     notification_id = str(uuid.uuid4())  # Unique ID for tracking
     channel = event.get("channel")  # Can be 'email', 'sms', or 'push'
-    recipient = event.get("recipient")  # Email or phone number
+    recipient = event.get("recipient")  # Email
+    phone_number = event.get("phone_number")
     message = event.get("message", "Default notification message")
     subject = event.get("subject", "Notification Alert")
-
     try:
         if channel == "email":
             message_id = send_email(recipient, subject, message)
             status = "Email Sent"
         elif channel == "sms":
-            message_id = send_sms(recipient, message)
+            message_id = send_sms(phone_number, message)
             status = "SMS Sent"
         elif channel == "push":
             message_id = send_push_notification(recipient, message)
-            status == "Push Sent"
+            status = "Push Sent"
         else:
             return {"statusCode": 400, "body": json.dumps({"error": "Invalid notification channel"})}
 
@@ -203,9 +176,12 @@ def lambda_handler(event, context):
         return {
             "statusCode": 200,
             "body": json.dumps({
-                "message": status,
-                "notification_id": notification_id,
-                "message_id": message_id
+                "message": message,
+                "id": notification_id,
+                "message_id": message_id,
+                "recipient": recipient,
+                "channel": channel,
+                "status": status,
             })
         }
 
@@ -215,3 +191,14 @@ def lambda_handler(event, context):
             "body": json.dumps({"error": str(e)})
         }
 
+def store_notification_metadata(notification_id, recipient, channel, status):
+    """Store notification metadata in DynamoDB"""
+    table = dynamodb.Table(DYNAMODB_TABLE)
+    item = {
+        "id": notification_id,
+        "recipient": recipient,
+        "channel": channel,
+        "status": status
+    }
+
+    table.put_item(Item=item)
